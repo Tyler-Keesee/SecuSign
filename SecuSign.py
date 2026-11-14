@@ -35,8 +35,8 @@ logging.basicConfig(
 
 # Rate limiter
 limiter = Limiter(
-    get_remote_address,
-    app=app,
+    app,
+    key_func=get_remote_address,
     default_limits=["200 per hour"]
 )
 
