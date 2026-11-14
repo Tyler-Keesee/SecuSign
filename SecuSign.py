@@ -17,7 +17,8 @@ import secrets
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=os.getenv('CORS_ORIGINS', 'http://127.0.0.1:5000').split(','))
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 # Define upload folder
 BASE_DIR = os.path.join(os.getcwd(), "uploads")
@@ -178,6 +179,8 @@ def register():
     username = data.get("username")
     password = data.get("password")
     email = data.get("email")
+    if isinstance(username, str) and username.casefold() == 'admin':
+        return jsonify({"error": "Reserved account name"}), 400
     if not username or not password or not email:
         return jsonify({"error": "Missing required fields"}), 400
     hashed_password = generate_password_hash(password)
@@ -237,11 +240,16 @@ def api_batch_sign():
 def admin_dashboard():
     token = request.headers.get("Authorization")
     payload = validate_token(token)
-    if not payload or payload.get("username") != "admin":
+    if not payload:
         return jsonify({"error": "Unauthorized"}), 401
-    
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    cursor.execute("SELECT role FROM users WHERE username = ?", (payload.get("username"),))
+    row = cursor.fetchone()
+    if not row or row[0] != "admin":
+        conn.close()
+        return jsonify({"error": "Forbidden"}), 403
     cursor.execute("SELECT * FROM audit_logs")
     logs = cursor.fetchall()
     conn.close()
@@ -249,12 +257,6 @@ def admin_dashboard():
 
 # Run the server
 if __name__ == "__main__":
-    # Generate RSA keys on script start
-    keys = generate_keys()
-    print(f"Keys generated: Private key - {keys['private_key']}, Public key - {keys['public_key']}")
-
-    # Start the Flask app
-    local_ip = socket.gethostbyname(socket.gethostname())
-    print(f" * Running on https://127.0.0.1:5000")
-    print(f" * Running on https://{local_ip}:5000")
-    app.run
+    # Local development only. Keys are generated only by an authorized API call.
+    print(" * Local development only: http://127.0.0.1:5000")
+    app.run(host="127.0.0.1", port=5000, debug=False)
