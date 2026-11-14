@@ -1,0 +1,14 @@
+# Never commit local credentials, generated keys, or runtime databases
+.env
+.env.*
+!.env.example
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
