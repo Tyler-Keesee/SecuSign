@@ -1,5 +1,52 @@
 # SecuSign — File Signing API Prototype
 
+## Windows 11 PowerShell quick start, one command at a time
+
+This is a **local Flask API security experiment**, not a production signing service. Use a Python 3.11 virtual environment for its older pinned dependencies. No activation is necessary.
+
+```powershell
+winget install --id Python.Python.3.11 --exact
+```
+
+```powershell
+git clone https://github.com/Tyler-Keesee/SecuSign.git
+```
+
+```powershell
+Set-Location .\SecuSign
+```
+
+```powershell
+py -3.11 -m venv .venv
+```
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+```
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+```powershell
+.\.venv\Scripts\python.exe -m compileall -q SecuSign.py
+```
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+```powershell
+.\.venv\Scripts\python.exe SecuSign.py
+```
+
+Visit http://127.0.0.1:5000/ from the same machine for a route check (a JSON 404 at `/` is normal if no homepage endpoint exists). Use test data only. Runtime storage contains **unencrypted private keys**. Never deploy publicly without a full security redesign. CI checks are limited smoke tests, not proof of safety. The included Dockerfile is empty and cannot build a real image.
+
+**Verification:** Successful installation and syntax checks do not prove the entire system works. Run the repository's documented manual tests before relying on it.
+
+---
+
+
 **Status: educational Flask security experiment; not production-ready. Do not expose on the public internet or use with sensitive documents.**
 
 ## Implemented API surface
